@@ -1,4 +1,6 @@
-﻿namespace Koala.CommandHandlerService.Services.Interfaces;
+﻿using Koala.CommandHandlerService.Models;
+
+namespace Koala.CommandHandlerService.Services.Interfaces;
 
 public interface IServiceBusHandler
 {

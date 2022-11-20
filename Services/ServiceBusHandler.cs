@@ -9,20 +9,20 @@ namespace Koala.CommandHandlerService.Services;
 public class ServiceBusHandler : IServiceBusHandler
 {
     private readonly IConfiguration _configuration;
-    private readonly ServiceBusClient _client;
+    private readonly ServiceBusClient _serviceBusClient;
     private ServiceBusProcessor? _processor;
     private readonly ICommandHandler _commandHandler;
 
-    public ServiceBusHandler(IConfiguration configuration, ServiceBusClient client, ICommandHandler commandHandler)
+    public ServiceBusHandler(IConfiguration configuration, ServiceBusClient serviceBusClient, ICommandHandler commandHandler)
     {
         _configuration = configuration;
-        _client = client;
+        _serviceBusClient = serviceBusClient;
         _commandHandler = commandHandler;
     }
 
     public async Task InitializeAsync()
     {
-        _processor = _client.CreateProcessor(_configuration["ServiceBus:CommandQueueName"], new ServiceBusProcessorOptions
+        _processor = _serviceBusClient.CreateProcessor(_configuration["ServiceBus:CommandQueueName"], new ServiceBusProcessorOptions
         {
             AutoCompleteMessages = true,
             MaxAutoLockRenewalDuration = TimeSpan.FromMinutes(15),
@@ -43,7 +43,7 @@ public class ServiceBusHandler : IServiceBusHandler
             Console.WriteLine(ex.Message);
         }
     }
-    
+
     public async Task CloseQueueAsync()
     {
         if (_processor != null) await _processor.CloseAsync();
@@ -57,8 +57,12 @@ public class ServiceBusHandler : IServiceBusHandler
     private async Task MessageHandler(ProcessMessageEventArgs args)
     {
         var body = args.Message.Body.ToString();
+        if (string.IsNullOrEmpty(body)) return;
+        
         var message = JsonConvert.DeserializeObject<Message>(body);
-        await _commandHandler.HandleCommandAsync(message);
+        if (message == null) return;
+        
+        var result = await _commandHandler.HandleCommandAsync(message);
 
         // complete the message. message is deleted from the queue. 
         await args.CompleteMessageAsync(args.Message);
