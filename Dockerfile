@@ -15,4 +15,4 @@ RUN dotnet publish "Koala.Command.Handler.Service.csproj" -c Release -o /app/pub
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "Koala.MessageHandlerService.dll"]
+ENTRYPOINT ["dotnet", "Koala.CommandHandlerService.dll"]

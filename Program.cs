@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Azure;
+﻿using Koala.CommandHandlerService.Services;
+using Koala.CommandHandlerService.Services.Interfaces;
+using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -16,7 +18,9 @@ internal static class Program
                 {
                     builder.AddServiceBusClient(hostContext.Configuration["ServiceBus:ConnectionString"]);
                 });
-                
+
+                services.AddSingleton<IServiceBusHandler, ServiceBusHandler>();
+                services.AddScoped<ICommandHandler, CommandHandler>();
                 services.AddHostedService<CommandHandlerWorker>();
             })
             .UseConsoleLifetime()

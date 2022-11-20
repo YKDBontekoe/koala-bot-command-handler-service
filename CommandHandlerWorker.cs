@@ -1,16 +1,25 @@
-﻿using Microsoft.Extensions.Hosting;
+﻿using Koala.CommandHandlerService.Services.Interfaces;
+using Microsoft.Extensions.Hosting;
 
 namespace Koala.CommandHandlerService;
 
 public class CommandHandlerWorker : IHostedService
 {
-    public Task StartAsync(CancellationToken cancellationToken)
+    private readonly IServiceBusHandler _serviceBusHandler;
+
+    public CommandHandlerWorker(IServiceBusHandler serviceBusHandler)
     {
-        throw new NotImplementedException();
+        _serviceBusHandler = serviceBusHandler;
     }
 
-    public Task StopAsync(CancellationToken cancellationToken)
+    public async Task StartAsync(CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        await _serviceBusHandler.InitializeAsync();
+    }
+
+    public async Task StopAsync(CancellationToken cancellationToken)
+    {
+        await _serviceBusHandler.DisposeAsync()!;
+        await _serviceBusHandler.CloseQueueAsync()!;
     }
 }
