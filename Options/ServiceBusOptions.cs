@@ -6,4 +6,5 @@ public class ServiceBusOptions
     
     public string ConnectionString { get; set; } = string.Empty;
     public string CommandQueueName { get; set; } = string.Empty;
+    public string SendMessageQueueName { get; set; } = string.Empty;
 }

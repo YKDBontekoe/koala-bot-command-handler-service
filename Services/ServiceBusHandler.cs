@@ -11,14 +11,18 @@ namespace Koala.CommandHandlerService.Services;
 public class ServiceBusHandler : IServiceBusHandler
 {
     private readonly ServiceBusProcessor? _processor;
+    private readonly ServiceBusClient _serviceBusClient;
     private readonly ICommandHandler _commandHandler;
+    private readonly ServiceBusOptions _serviceBusOptions;
 
-    public ServiceBusHandler(ServiceBusClient serviceBusClient, ICommandHandler commandHandler, IOptions<ServiceBusOptions> serviceBusOptions)
+    public ServiceBusHandler(ServiceBusClient serviceBusServiceBusClient, ICommandHandler commandHandler, IOptions<ServiceBusOptions> serviceBusOptions)
     {
         _commandHandler = commandHandler;
-        _processor = serviceBusClient.CreateProcessor(serviceBusOptions.Value.CommandQueueName, new ServiceBusProcessorOptions
+        _serviceBusClient = serviceBusServiceBusClient;
+        _serviceBusOptions = serviceBusOptions != null ? serviceBusOptions.Value : throw new ArgumentNullException(nameof(serviceBusOptions));
+        _processor = serviceBusServiceBusClient.CreateProcessor(serviceBusOptions.Value.CommandQueueName, new ServiceBusProcessorOptions
         {
-            AutoCompleteMessages = false,
+            AutoCompleteMessages = true,
             MaxConcurrentCalls = 1
         });
     }
@@ -59,9 +63,10 @@ public class ServiceBusHandler : IServiceBusHandler
         if (message == null) return;
         
         var result = await _commandHandler.HandleCommandAsync(message);
-
+        
         // complete the message. message is deleted from the queue. 
-        await args.CompleteMessageAsync(args.Message);
+        var sender = _serviceBusClient.CreateSender(_serviceBusOptions.SendMessageQueueName);
+        await sender.SendMessageAsync(new ServiceBusMessage(JsonConvert.SerializeObject(result)));
     }
     
     private static Task ErrorHandler(ProcessErrorEventArgs args)
