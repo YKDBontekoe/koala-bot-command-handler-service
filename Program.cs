@@ -1,9 +1,11 @@
-﻿using Koala.CommandHandlerService.Services;
+﻿using Koala.CommandHandlerService.Options;
+using Koala.CommandHandlerService.Services;
 using Koala.CommandHandlerService.Services.Interfaces;
 using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 
 namespace Koala.CommandHandlerService;
 
@@ -13,30 +15,45 @@ internal static class Program
     {
         var host = Host
             .CreateDefaultBuilder(args)
-            .ConfigureHostConfiguration(builder =>
-            {
-                builder
-                    .SetBasePath(Directory.GetCurrentDirectory())
-                    .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-                    .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}.json",
-                        optional: true, reloadOnChange: true);
-                
-                builder.AddEnvironmentVariables();
-            })
+            .ConfigureAppConfiguration((context, builder) =>
+                {
+                    var env = context.HostingEnvironment;
+
+                    builder
+                        .SetBasePath(env.ContentRootPath)
+                        .AddJsonFile("appsettings.json", true, true)
+                        .AddJsonFile($"appsettings.{env.EnvironmentName}.json", true, true)
+                        .AddEnvironmentVariables();
+                }
+            )
             .ConfigureServices((hostContext, services) =>
             {
-                services.AddAzureClients(builder =>
-                {
-                    builder.AddServiceBusClient(hostContext.Configuration["ServiceBus:ConnectionString"]);
-                });
+                ConfigureOptions(services, hostContext.Configuration);
+                ConfigureServiceBus(services);
 
                 services.AddSingleton<IServiceBusHandler, ServiceBusHandler>();
-                services.AddScoped<ICommandHandler, CommandHandler>();
+                services.AddTransient<ICommandHandler, CommandHandler>();
                 services.AddHostedService<CommandHandlerWorker>();
             })
             .UseConsoleLifetime()
             .Build();
 
         await host.RunAsync();
+    }
+    
+    // Configure options for the application to use in the services
+    private static void ConfigureOptions(IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddOptions();
+        services.Configure<ServiceBusOptions>(configuration.GetSection(ServiceBusOptions.ServiceBus));
+    }
+
+    // Configure the Azure Service Bus client with the connection string
+    private static void ConfigureServiceBus(IServiceCollection services)
+    {
+        services.AddAzureClients(builder =>
+        {
+            builder.AddServiceBusClient(services.BuildServiceProvider().GetRequiredService<IOptions<ServiceBusOptions>>().Value.ConnectionString);
+        });
     }
 }

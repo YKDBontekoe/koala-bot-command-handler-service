@@ -1,34 +1,30 @@
 ﻿using Azure.Messaging.ServiceBus;
 using Koala.CommandHandlerService.Models;
+using Koala.CommandHandlerService.Options;
 using Koala.CommandHandlerService.Services.Interfaces;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 
 namespace Koala.CommandHandlerService.Services;
 
 public class ServiceBusHandler : IServiceBusHandler
 {
-    private readonly IConfiguration _configuration;
-    private readonly ServiceBusClient _serviceBusClient;
-    private ServiceBusProcessor? _processor;
+    private readonly ServiceBusProcessor? _processor;
     private readonly ICommandHandler _commandHandler;
 
-    public ServiceBusHandler(IConfiguration configuration, ServiceBusClient serviceBusClient, ICommandHandler commandHandler)
+    public ServiceBusHandler(ServiceBusClient serviceBusClient, ICommandHandler commandHandler, IOptions<ServiceBusOptions> serviceBusOptions)
     {
-        _configuration = configuration;
-        _serviceBusClient = serviceBusClient;
         _commandHandler = commandHandler;
+        _processor = serviceBusClient.CreateProcessor(serviceBusOptions.Value.CommandQueueName, new ServiceBusProcessorOptions
+        {
+            AutoCompleteMessages = false,
+            MaxConcurrentCalls = 1
+        });
     }
 
     public async Task InitializeAsync()
     {
-        _processor = _serviceBusClient.CreateProcessor(_configuration["ServiceBus:CommandQueueName"], new ServiceBusProcessorOptions
-        {
-            AutoCompleteMessages = true,
-            MaxAutoLockRenewalDuration = TimeSpan.FromMinutes(15),
-            PrefetchCount = 100,
-        });
-        
         try
         {
             // add handler to process messages
