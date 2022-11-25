@@ -1,6 +1,7 @@
 ﻿using Koala.CommandHandlerService.Services;
 using Koala.CommandHandlerService.Services.Interfaces;
 using Microsoft.Extensions.Azure;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -12,6 +13,16 @@ internal static class Program
     {
         var host = Host
             .CreateDefaultBuilder(args)
+            .ConfigureHostConfiguration(builder =>
+            {
+                builder
+                    .SetBasePath(Directory.GetCurrentDirectory())
+                    .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                    .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}.json",
+                        optional: true, reloadOnChange: true);
+                
+                builder.AddEnvironmentVariables();
+            })
             .ConfigureServices((hostContext, services) =>
             {
                 services.AddAzureClients(builder =>
