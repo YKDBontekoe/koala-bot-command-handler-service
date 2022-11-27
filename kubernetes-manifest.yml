@@ -6,6 +6,11 @@ spec:
     selector:
         app: koala-command-handler
     type: LoadBalancer
+    ports:
+    - port: 80
+      targetPort: 80
+      protocol: TCP
+      name: http
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -24,9 +29,8 @@ spec:
           containers:
           - name: koala-command-handler
             image: koala-command-handler
+            ports:
+              - containerPort: 8080
             env:
               - name: ASPNETCORE_ENVIRONMENT
                 value: "Production"
-            ports:
-                - containerPort: 8080
-  
