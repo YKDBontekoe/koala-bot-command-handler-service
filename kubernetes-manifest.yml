@@ -1,4 +1,13 @@
-﻿apiVersion: apps/v1
+﻿apiVersion: v1
+kind: Service
+metadata:
+  name: koala-command-handler
+spec:
+    selector:
+        app: koala-command-handler
+    type: LoadBalancer
+---
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: koala-command-handler
@@ -6,15 +15,16 @@ spec:
     replicas: 1
     selector:
         matchLabels:
-        app: koala-command-handler-service
+        app: koala-command-handler
     template:
         metadata:
         labels:
-            app: koala-command-handler-service
+            app: koala-command-handler
         spec:
         containers:
-        - name: koala-command-handler-service
-          image: koala-command-handler-service
+        - name: koala-command-handler
+          image: koala-command-handler
           env:
-            - name: DOTNET_ENVIRONMENT
+            - name: ASPNETCORE_ENVIRONMENT
               value: "Production"
+  
