@@ -1,36 +1,36 @@
 ﻿apiVersion: v1
 kind: Service
 metadata:
-  name: koala-command-handler
+  name: koala-command-handler-service
 spec:
     selector:
-        app: koala-command-handler
+        app: koala-command-handler-service
     type: LoadBalancer
     ports:
-    - port: 80
-      targetPort: 80
+    - port: 32000
+      targetPort: 5001
       protocol: TCP
       name: http
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: koala-command-handler
+  name: koala-command-handler-service
 spec:
     replicas: 1
     selector:
         matchLabels:
-          app: koala-command-handler
+          app: koala-command-handler-service
     template:
         metadata:
           labels:
-            app: koala-command-handler
+            app: koala-command-handler-service
         spec:
           containers:
-          - name: koala-command-handler
-            image: koala-command-handler
+          - name: koala-command-handler-service
+            image: koala-command-handler-service
             ports:
-              - containerPort: 8080
+              - containerPort: 5001
             env:
               - name: ASPNETCORE_ENVIRONMENT
                 value: "Production"
