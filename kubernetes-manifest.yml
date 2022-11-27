@@ -4,6 +4,11 @@ metadata:
   name: koala-command-handler-service
 spec:
     replicas: 1
+    strategy:
+      type: RollingUpdate
+      rollingUpdate:
+        maxSurge: 1
+        maxUnavailable: 1
     selector:
         matchLabels:
           app: koala-command-handler-service
@@ -12,11 +17,13 @@ spec:
           labels:
             app: koala-command-handler-service
         spec:
+          restartPolicy: Always
           containers:
           - name: koala-command-handler-service
-            image: koala-command-handler-service
+            image: ykdbonteregistry.azurecr.io/koala-command-handler-service:v1
+            imagePullPolicy: Always
             ports:
               - containerPort: 5001
             env:
-              - name: ASPNETCORE_ENVIRONMENT
+              - name: DOTNET_ENVIRONMENT
                 value: "Production"
