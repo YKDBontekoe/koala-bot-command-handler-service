@@ -17,9 +17,6 @@ spec:
         matchLabels:
         app: koala-command-handler
     template:
-        metadata:
-        labels:
-            app: koala-command-handler
         spec:
         containers:
         - name: koala-command-handler
