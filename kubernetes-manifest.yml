@@ -1,18 +1,4 @@
-﻿apiVersion: v1
-kind: Service
-metadata:
-  name: koala-command-handler-service
-spec:
-    selector:
-        app: koala-command-handler-service
-    type: LoadBalancer
-    ports:
-    - port: 32000
-      targetPort: 5001
-      protocol: TCP
-      name: http
----
-apiVersion: apps/v1
+﻿apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: koala-command-handler-service
