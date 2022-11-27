@@ -9,7 +9,7 @@ public class HelpCommand : ICommand
     public string Execute(string[] args)
     {
         return RegisteredCommands.Commands
-            .Where(c => c.Key.Equals("help", StringComparison.OrdinalIgnoreCase) == false)
+            .Where(c => !c.Key.Equals("help", StringComparison.OrdinalIgnoreCase))
             .Select(x => x.Key)
             .Aggregate((x, y) => $"{x}, {y}");
     }
