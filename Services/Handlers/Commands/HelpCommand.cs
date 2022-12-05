@@ -1,21 +1,40 @@
-﻿using Koala.CommandHandlerService.Models;
+﻿using Koala.CommandHandlerService.DTOs;
+using Koala.CommandHandlerService.Services.Handlers.Commands.Interfaces;
+using Koala.CommandHandlerService.Services.Handlers.Interfaces;
 
 namespace Koala.CommandHandlerService.Services.Handlers.Commands;
 
 public class HelpCommand : ICommand
 {
-    private readonly IReadOnlySet<string> _validArguments = new HashSet<string> { "test" };
+    private readonly IReadOnlySet<CommandOptionDto> _validArguments = new HashSet<CommandOptionDto>();
     
-    public string Execute(string[] args)
+    private readonly IHandlerService _handlerService;
+
+    public HelpCommand(IHandlerService handlerService)
     {
-        return RegisteredCommands.Commands
-            .Where(c => !c.Key.Equals("help", StringComparison.OrdinalIgnoreCase))
-            .Select(x => x.Key)
-            .Aggregate((x, y) => $"{x}, {y}");
+        _handlerService = handlerService;
     }
 
-    public IReadOnlySet<string> GetValidArgs()
+    public Task<OptionDto<string>> ExecuteAsync(IReadOnlyDictionary<string, string> argsAndValues)
+    {
+        return Task.FromResult(new OptionDto<string>(_handlerService.GetCommands()
+            .Where(c => !c.GetCommandName().Equals(GetCommandName(), StringComparison.OrdinalIgnoreCase))
+            .Select(x => x.GetCommandName())
+            .Aggregate((x, y) => $"{x}, {y}")));
+    }
+
+    public IReadOnlySet<CommandOptionDto> GetValidArgs()
     {
         return _validArguments;
+    }
+
+    public string GetCommandName()
+    {
+        return "help";
+    }
+
+    public string GetCommandDescription()
+    {
+        return "Returns a list of all available commands";
     }
 }

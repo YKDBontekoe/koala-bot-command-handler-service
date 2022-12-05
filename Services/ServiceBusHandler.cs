@@ -64,7 +64,6 @@ public class ServiceBusHandler : IServiceBusHandler
         
         var result = await _commandHandler.HandleCommandAsync(message);
         
-        // complete the message. message is deleted from the queue. 
         var sender = _serviceBusClient.CreateSender(_serviceBusOptions.SendMessageQueueName);
         await sender.SendMessageAsync(new ServiceBusMessage(JsonConvert.SerializeObject(result)));
     }

@@ -1,6 +1,11 @@
 ﻿using Koala.CommandHandlerService.Options;
+using Koala.CommandHandlerService.Repositories;
+using Koala.CommandHandlerService.Repositories.Interfaces;
 using Koala.CommandHandlerService.Services;
+using Koala.CommandHandlerService.Services.Handlers;
+using Koala.CommandHandlerService.Services.Handlers.Interfaces;
 using Koala.CommandHandlerService.Services.Interfaces;
+using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -30,10 +35,8 @@ internal static class Program
             {
                 ConfigureOptions(services, hostContext.Configuration);
                 ConfigureServiceBus(services);
-
-                services.AddSingleton<IServiceBusHandler, ServiceBusHandler>();
-                services.AddTransient<ICommandHandler, CommandHandler>();
-                services.AddHostedService<CommandHandlerWorker>();
+                ConfigureCosmosDb(services);
+                ConfigureServices(services);
             })
             .UseConsoleLifetime()
             .Build();
@@ -46,6 +49,8 @@ internal static class Program
     {
         services.AddOptions();
         services.Configure<ServiceBusOptions>(configuration.GetSection(ServiceBusOptions.ServiceBus));
+        services.Configure<CosmosDbOptions>(configuration.GetSection(CosmosDbOptions.CosmosDb));
+        services.Configure<DiscordOptions>(configuration.GetSection(DiscordOptions.Discord));
     }
 
     // Configure the Azure Service Bus client with the connection string
@@ -55,5 +60,24 @@ internal static class Program
         {
             builder.AddServiceBusClient(services.BuildServiceProvider().GetRequiredService<IOptions<ServiceBusOptions>>().Value.ConnectionString);
         });
+    }
+
+    // Configure the Azure Cosmos DB client with the connection string
+    private static void ConfigureCosmosDb(IServiceCollection services)
+    {
+        services.AddSingleton<CosmosClient>(_ => new CosmosClient(services.BuildServiceProvider().GetRequiredService<IOptions<CosmosDbOptions>>().Value.ConnectionString));
+    }
+    
+    // Configure services for the application
+    private static void ConfigureServices(IServiceCollection services)
+    {
+        services.AddTransient(typeof(IGenericRepository<>), typeof(CosmosDbGenericRepository<>));
+        services.AddTransient<IActivitiesRepository, CosmosDbActivitiesRepository>();
+        services.AddTransient<IMessagesRepository, CosmosDbMessagesRepository>();
+        services.AddTransient<IHandlerService, HandlerService>();
+        services.AddTransient<ICommandHandler, CommandHandler>();
+        services.AddSingleton<IServiceBusHandler, ServiceBusHandler>();
+
+        services.AddHostedService<CommandHandlerWorker>();
     }
 }
