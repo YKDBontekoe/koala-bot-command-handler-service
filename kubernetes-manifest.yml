@@ -20,7 +20,7 @@ spec:
           restartPolicy: Always
           containers:
           - name: koala-command-handler-service
-            image: ykdbonteregistry.azurecr.io/koala-command-handler-service:v1
+            image: ykdbonteregistry.azurecr.io/koala-command-handler-service:latest
             resources:
               requests:
                 cpu: 500m
