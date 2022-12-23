@@ -1,6 +1,6 @@
-﻿namespace Koala.CommandHandlerService.Models;
+﻿namespace Koala.CommandHandlerService.Models.Message;
 
-public class Channel
+public sealed class Channel
 {
     public ulong Id { get; set; }
     public string Name { get; set; }

@@ -1,5 +1,6 @@
 ﻿using Azure.Messaging.ServiceBus;
 using Koala.CommandHandlerService.Models;
+using Koala.CommandHandlerService.Models.Message;
 using Koala.CommandHandlerService.Options;
 using Koala.CommandHandlerService.Services.Interfaces;
 using Microsoft.Extensions.Configuration;

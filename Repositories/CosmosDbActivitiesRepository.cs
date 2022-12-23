@@ -1,5 +1,5 @@
 ﻿using System.Linq.Expressions;
-using Koala.ActivityConsumerService.Models;
+using Koala.CommandHandlerService.Models.Activity;
 using Koala.CommandHandlerService.Options;
 using Koala.CommandHandlerService.Repositories.Interfaces;
 using Microsoft.Extensions.Options;

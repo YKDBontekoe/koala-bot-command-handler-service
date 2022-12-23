@@ -1,6 +1,6 @@
-﻿namespace Koala.CommandHandlerService.Models;
+﻿namespace Koala.CommandHandlerService.Models.Message;
 
-public class Guild
+public sealed class Guild
 {
     public ulong Id { get; set; }
     public string Name { get; set; }

@@ -1,0 +1,14 @@
+﻿version: '3.8'
+services:
+  koala-command-handler:
+    image: koala-command-handler
+    build:
+      context: .
+      dockerfile: Dockerfile.Development
+    volumes:
+      - .:/app
+    working_dir: /app
+    environment:
+      - DOTNET_ENVIRONMENT=Development
+    command:
+      - dotnet watch run --project Koala.Command.Handler.Service/Koala.Command.Handler.Service.csproj

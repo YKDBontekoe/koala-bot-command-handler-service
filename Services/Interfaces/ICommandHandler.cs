@@ -1,4 +1,5 @@
 ﻿using Koala.CommandHandlerService.Models;
+using Koala.CommandHandlerService.Models.Message;
 
 namespace Koala.CommandHandlerService.Services.Interfaces;
 

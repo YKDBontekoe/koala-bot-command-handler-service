@@ -1,5 +1,6 @@
 ﻿using System.Linq.Expressions;
 using Koala.CommandHandlerService.Models;
+using Koala.CommandHandlerService.Models.Message;
 using Koala.CommandHandlerService.Options;
 using Koala.CommandHandlerService.Repositories.Interfaces;
 using Microsoft.Azure.Cosmos;

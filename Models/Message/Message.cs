@@ -1,8 +1,8 @@
 ﻿using Newtonsoft.Json;
 
-namespace Koala.CommandHandlerService.Models;
+namespace Koala.CommandHandlerService.Models.Message;
 
-public class Message
+public sealed class Message
 {
     [JsonProperty(PropertyName ="id")]
     public string Id { get; set; }

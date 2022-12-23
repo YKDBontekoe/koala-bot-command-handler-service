@@ -10,21 +10,18 @@ namespace Koala.CommandHandlerService.Repositories;
 public class CosmosDbGenericRepository<T> : IGenericRepository<T> where T : class
 
 {
-    private readonly CosmosClient _database;
-    private readonly CosmosDbOptions _options;
+    private readonly CosmosDbContext _context;
 
-    public CosmosDbGenericRepository(IOptions<CosmosDbOptions> cosmosDbOptions, CosmosClient database)
-    {
-        _database = database;
-        _options = cosmosDbOptions != null ? cosmosDbOptions.Value : throw new ArgumentNullException(nameof(cosmosDbOptions));
+    public CosmosDbGenericRepository(CosmosDbContext context)
+    { 
+        _context = context;
     }
 
     public async Task<IEnumerable<T>> GetAsync(string containerName, Expression<Func<T, bool>> activityPredicate, Expression<Func<T, object>>? orderBy = null, Expression<Func<T, object>>? groupBy = null,
         bool isDescending = false)
     {
-        var query = _database.GetContainer(_options.DatabaseName, containerName)
-            .GetItemLinqQueryable<T>(true).AsEnumerable().AsQueryable();
-           // .Where(activityPredicate);
+        var query = _context.GetDbSet<T>().AsQueryable();
+        // .Where(activityPredicate);
 
         if (orderBy != null) 
             query = OrderBy(query, orderBy, isDescending);

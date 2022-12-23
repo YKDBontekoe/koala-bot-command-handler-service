@@ -1,7 +1,7 @@
 ﻿using System.Linq.Expressions;
 using System.Text;
-using Koala.ActivityConsumerService.Models;
 using Koala.CommandHandlerService.DTOs;
+using Koala.CommandHandlerService.Models.Activity;
 using Koala.CommandHandlerService.Repositories.Interfaces;
 using Koala.CommandHandlerService.Services.Handlers.Commands.Interfaces;
 
@@ -42,7 +42,10 @@ public class SpotifyInfoCommand : ICommand
         {
             if (activity.SpotifyInfo is null)
             {
-                sb.AppendLine($"{activity.Name} -");
+                if (!string.IsNullOrEmpty(activity.Name))
+                {
+                    sb.AppendLine($"{activity.Name} -");
+                }
                 continue;
             }
   

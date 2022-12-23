@@ -1,5 +1,6 @@
 ﻿using System.Linq.Expressions;
 using Koala.CommandHandlerService.Models;
+using Koala.CommandHandlerService.Models.Message;
 
 namespace Koala.CommandHandlerService.Repositories.Interfaces;
 

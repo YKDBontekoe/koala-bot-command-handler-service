@@ -1,6 +1,6 @@
-﻿namespace Koala.ActivityConsumerService.Models;
+﻿namespace Koala.CommandHandlerService.Models.Activity;
 
-public class SpotifyInfo
+public sealed class SpotifyInfo
 {
     public string Album { get; set; }
     public IReadOnlyCollection<string> Artists { get; set; }

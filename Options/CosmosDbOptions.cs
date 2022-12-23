@@ -7,5 +7,6 @@ public class CosmosDbOptions
     public string DatabaseName { get; set; } = string.Empty;
     public string MessagesContainerName { get; set; } = string.Empty;
     public string ActivitiesContainerName { get; set; } = string.Empty;
-    public string ConnectionString { get; set; } = string.Empty;
+    public string EndpointUri { get; set; } = string.Empty;
+    public string AccountKey { get; set; } = string.Empty;
 }

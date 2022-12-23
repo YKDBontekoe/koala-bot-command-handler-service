@@ -6,6 +6,7 @@ using Koala.CommandHandlerService.Services.Handlers;
 using Koala.CommandHandlerService.Services.Handlers.Interfaces;
 using Koala.CommandHandlerService.Services.Interfaces;
 using Microsoft.Azure.Cosmos;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -34,8 +35,8 @@ internal static class Program
             .ConfigureServices((hostContext, services) =>
             {
                 ConfigureOptions(services, hostContext.Configuration);
-                ConfigureServiceBus(services);
                 ConfigureCosmosDb(services);
+                ConfigureServiceBus(services);
                 ConfigureServices(services);
             })
             .UseConsoleLifetime()
@@ -65,19 +66,24 @@ internal static class Program
     // Configure the Azure Cosmos DB client with the connection string
     private static void ConfigureCosmosDb(IServiceCollection services)
     {
-        services.AddSingleton<CosmosClient>(_ => new CosmosClient(services.BuildServiceProvider().GetRequiredService<IOptions<CosmosDbOptions>>().Value.ConnectionString));
+        services.AddDbContext<CosmosDbContext>(options =>
+        {
+            options.UseCosmos(services.BuildServiceProvider().GetRequiredService<IOptions<CosmosDbOptions>>().Value.EndpointUri,
+                services.BuildServiceProvider().GetRequiredService<IOptions<CosmosDbOptions>>().Value.AccountKey,
+                services.BuildServiceProvider().GetRequiredService<IOptions<CosmosDbOptions>>().Value.DatabaseName);
+        });
     }
     
     // Configure services for the application
     private static void ConfigureServices(IServiceCollection services)
     {
-        services.AddTransient(typeof(IGenericRepository<>), typeof(CosmosDbGenericRepository<>));
-        services.AddTransient<IActivitiesRepository, CosmosDbActivitiesRepository>();
-        services.AddTransient<IMessagesRepository, CosmosDbMessagesRepository>();
-        services.AddTransient<IHandlerService, HandlerService>();
-        services.AddTransient<ICommandHandler, CommandHandler>();
-        services.AddSingleton<IServiceBusHandler, ServiceBusHandler>();
+        services.AddScoped(typeof(IGenericRepository<>), typeof(CosmosDbGenericRepository<>));
+        services.AddScoped<IActivitiesRepository, CosmosDbActivitiesRepository>();
+        services.AddScoped<IMessagesRepository, CosmosDbMessagesRepository>();
+        services.AddScoped<IHandlerService, HandlerService>();
+        services.AddScoped<ICommandHandler, CommandHandler>();
+        services.AddTransient<IServiceBusHandler, ServiceBusHandler>();
 
-        services.AddHostedService<CommandHandlerWorker>();
+        services.AddScoped<IHostedService, CommandHandlerWorker>();
     }
 }
